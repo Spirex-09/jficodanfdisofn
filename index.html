@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedro | Full-Stack Developer & Security Engineer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Fira Code (para terminal) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome para Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Configuración personalizada de Tailwind -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1', // Indigo principal
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            cyan: '#06b6d4',
+                            emerald: '#10b981',
+                            crimson: '#f43f5e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Animaciones personalizadas */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.8)); }
+        }
+        .animate-glow {
+            animation: pulse-glow 3s infinite;
+        }
+
+        /* Ocultar barra de scroll estéticamente */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.1);
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.9);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.4);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.7);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors duration-300 relative overflow-x-hidden">
+
+    <!-- Fondo de partículas Canvas interactivo -->
+    <canvas id="particleCanvas" class="absolute top-0 left-0 w-full h-full pointer-events-none opacity-40 dark:opacity-30 z-0"></canvas>
+
+    <!-- Notificación / Toast de éxito -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-brand-emerald text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3 pointer-events-none">
+        <i class="fas fa-check-circle text-xl"></i>
+        <span id="toast-message" class="font-medium">¡Acción realizada con éxito!</span>
+    </div>
+
+    <!-- Barra de Navegación -->
+    <nav class="sticky top-0 z-40 backdrop-blur-md bg-white/75 dark:bg-slate-950/75 border-b border-slate-200/50 dark:border-slate-800/50 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                <!-- Logotipo / Nombre -->
+                <div class="flex-shrink-0 flex items-center space-x-2">
+                    <span class="text-2xl font-extrabold bg-gradient-to-r from-brand-500 to-brand-cyan bg-clip-text text-transparent">
+                        &lt;Pedro.Dev /&gt;
+                    </span>
+                </div>
+                
+                <!-- Menú de navegación (Desktop) -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#sobre-mi" class="hover:text-brand-500 font-medium transition-colors">Sobre Mí</a>
+                    <a href="#red-defence" class="hover:text-brand-crimson font-bold transition-colors flex items-center space-x-1">
+                        <span class="w-2 h-2 rounded-full bg-brand-crimson animate-ping"></span>
+                        <span>Red Defence (Jugar)</span>
+                    </a>
+                    <a href="#terminal" class="hover:text-brand-500 font-medium transition-colors">Consola CLI</a>
+                    <a href="#habilidades" class="hover:text-brand-500 font-medium transition-colors">Tecnologías</a>
+                    <a href="#proyectos" class="hover:text-brand-500 font-medium transition-colors">Otros Proyectos</a>
+                    <a href="#contacto" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all duration-300 transform hover:-translate-y-0.5">Contrátame</a>
+                    
+                    <!-- Botón de Modo Oscuro -->
+                    <button id="themeToggle" class="p-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 transition-colors text-slate-700 dark:text-slate-300" aria-label="Cambiar Tema">
+                        <i class="fas fa-sun dark:hidden"></i>
+                        <i class="fas fa-moon hidden dark:block"></i>
+                    </button>
+                </div>
+
+                <!-- Botón móvil (Hamburguesa y Tema) -->
+                <div class="flex md:hidden items-center space-x-4">
+                    <button id="themeToggleMobile" class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300">
+                        <i class="fas fa-sun dark:hidden"></i>
+                        <i class="fas fa-moon hidden dark:block"></i>
+                    </button>
+                    <button id="mobileMenuButton" class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none">
+                        <i class="fas fa-bars text-xl" id="menuIcon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú Móvil Desplegable -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 transition-all duration-300">
+            <div class="px-4 pt-2 pb-4 space-y-2">
+                <a href="#sobre-mi" class="block px-3 py-2 rounded-lg text-base font-medium hover:bg-slate-100 dark:hover:bg-slate-900">Sobre Mí</a>
+                <a href="#red-defence" class="block px-3 py-2 rounded-lg text-base font-bold text-brand-crimson hover:bg-slate-100 dark:hover:bg-slate-900">Red Defence (Jugar)</a>
+                <a href="#terminal" class="block px-3 py-2 rounded-lg text-base font-medium hover:bg-slate-100 dark:hover:bg-slate-900">Consola CLI</a>
+                <a href="#habilidades" class="block px-3 py-2 rounded-lg text-base font-medium hover:bg-slate-100 dark:hover:bg-slate-900">Habilidades</a>
+                <a href="#proyectos" class="block px-3 py-2 rounded-lg text-base font-medium hover:bg-slate-100 dark:hover:bg-slate-900">Otros Proyectos</a>
+                <a href="#contacto" class="block text-center px-4 py-3 bg-brand-500 text-white rounded-lg font-medium shadow-md">Contrátame</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sección Hero -->
+    <header class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20 md:py-32 flex flex-col lg:flex-row items-center justify-between gap-12">
+        <div class="flex-1 text-center lg:text-left space-y-6">
+            <div class="inline-flex items-center space-x-2 bg-brand-500/10 dark:bg-brand-500/20 text-brand-500 dark:text-brand-100 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide uppercase">
+                <span class="flex h-2 w-2 relative">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-emerald opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-emerald"></span>
+                </span>
+                <span>Buscando Nuevos Retos / Disponible</span>
+            </div>
+            
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight">
+                Hola, soy <span class="bg-gradient-to-r from-brand-500 via-brand-cyan to-brand-emerald bg-clip-text text-transparent">Pedro</span>
+                <span class="block text-2xl sm:text-3xl md:text-4xl mt-2 text-slate-600 dark:text-slate-400 font-medium">
+                    Programador Full-Stack &amp; Desarrollador de Sistemas Seguros
+                </span>
+            </h1>
+
+            <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto lg:mx-0">
+                Especializado en construir software robusto, arquitecturas optimizadas de backend y experiencias interactivas de frontend. Creo en la ciberseguridad, el rendimiento implacable y el código limpio como pilares fundamentales.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+                <a href="#contacto" class="w-full sm:w-auto px-8 py-4 text-center bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl shadow-lg shadow-brand-500/30 hover:shadow-brand-500/50 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center space-x-2">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Hablemos de Trabajo</span>
+                </a>
+                <a href="#red-defence" class="w-full sm:w-auto px-8 py-4 text-center bg-brand-crimson hover:bg-rose-600 text-white font-semibold rounded-xl shadow-lg shadow-brand-crimson/30 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center space-x-2 animate-pulse">
+                    <i class="fas fa-shield-halved"></i>
+                    <span>Probar Red Defence</span>
+                </a>
+                <button onclick="descargarCV()" class="w-full sm:w-auto px-6 py-4 text-center bg-slate-200 dark:bg-slate-900 hover:bg-slate-300 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold rounded-xl border border-slate-300 dark:border-slate-800 transition-all duration-300 flex items-center justify-center space-x-2">
+                    <i class="fas fa-download"></i>
+                    <span>Descargar CV</span>
+                </button>
+            </div>
+
+            <!-- Redes Sociales / Enlaces rápidos -->
+            <div class="flex items-center justify-center lg:justify-start space-x-6 pt-6 text-2xl text-slate-500 dark:text-slate-400">
+                <a href="#" class="hover:text-brand-500 transition-colors" title="GitHub"><i class="fab fa-github"></i></a>
+                <a href="#" class="hover:text-brand-500 transition-colors" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="hover:text-brand-500 transition-colors" title="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="hover:text-brand-500 transition-colors" title="StackOverflow"><i class="fab fa-stack-overflow"></i></a>
+            </div>
+        </div>
+
+        <!-- Tarjeta Visual Premium / Avatar -->
+        <div class="flex-1 relative w-full max-w-md mx-auto">
+            <div class="absolute inset-0 bg-gradient-to-tr from-brand-500 via-brand-cyan to-brand-emerald rounded-3xl blur-2xl opacity-30 dark:opacity-45 animate-glow"></div>
+            <div class="relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-8 shadow-2xl animate-float">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex space-x-1.5">
+                        <span class="w-3.5 h-3.5 rounded-full bg-red-500"></span>
+                        <span class="w-3.5 h-3.5 rounded-full bg-yellow-500"></span>
+                        <span class="w-3.5 h-3.5 rounded-full bg-green-500"></span>
+                    </div>
+                    <span class="text-xs font-mono text-slate-400 dark:text-slate-500">pedro_core.sh</span>
+                </div>
+                <!-- Bloques de estadísticas simuladas -->
+                <div class="space-y-4 font-mono text-xs sm:text-sm">
+                    <div class="p-4 rounded-xl bg-slate-100/50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
+                        <span class="text-brand-cyan">const</span> <span class="text-brand-500">pedroInfo</span> = {
+                        <div class="pl-4">
+                            <span class="text-amber-500">enfoque</span>: <span class="text-brand-emerald">"Seguridad &amp; Escalabilidad"</span>,<br>
+                            <span class="text-amber-500">stackPreferido</span>: <span class="text-brand-emerald">"MERN + Docker + Py"</span>,<br>
+                            <span class="text-amber-500">proyectoPrincipal</span>: <span class="text-brand-crimson">"Red Defence"</span>
+                        </div>
+                        };
+                    </div>
+                    <div class="p-4 rounded-xl bg-slate-100/50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
+                        <span class="text-brand-cyan">const</span> <span class="text-brand-500">metasDelMes</span> = [
+                        <div class="pl-4">
+                            <span class="text-emerald-400">"Ayudarte a mitigar fallos"</span>,<br>
+                            <span class="text-emerald-400">"Desplegar microservicios limpios"</span>
+                        </div>
+                        ];
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sección: RED DEFENCE - Proyecto estrella jugable -->
+    <section id="red-defence" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-200/50 dark:border-slate-800/50">
+        <div class="text-center max-w-3xl mx-auto mb-12">
+            <span class="text-brand-crimson font-bold uppercase tracking-wider text-sm flex items-center justify-center space-x-2">
+                <i class="fas fa-circle-exclamation animate-pulse"></i>
+                <span>PROYECTO DESTACADO &amp; JUGABLE</span>
+            </span>
+            <h2 class="text-3xl sm:text-5xl font-extrabold mt-2 text-slate-900 dark:text-white">Red Defence</h2>
+            <p class="text-slate-600 dark:text-slate-400 mt-4 leading-relaxed">
+                Diseñé y programé un simulador / juego arcade interactivo de ciberseguridad en tiempo real. 
+                <strong>¿El objetivo?</strong> Neutraliza los paquetes de malware (rojos) antes de que infecten el servidor central (verde). ¡Haz clic en los virus para destruirlos o toca en tu móvil!
+            </p>
+        </div>
+
+        <!-- Contenedor del Juego Interactuable -->
+        <div class="max-w-4xl mx-auto bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl p-6 relative overflow-hidden">
+            <!-- Barra de juego / Score -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4 font-mono text-white pb-4 border-b border-slate-800">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800">
+                        <span class="text-slate-400">Puntaje:</span> <span id="game-score" class="font-bold text-brand-cyan text-lg">0</span>
+                    </div>
+                    <div class="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800">
+                        <span class="text-slate-400 font-semibold">Max Score:</span> <span id="game-high" class="font-bold text-yellow-500 text-lg">0</span>
+                    </div>
+                </div>
+                <!-- Barra de Vida del Servidor -->
+                <div class="flex-1 max-w-xs w-full">
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-brand-emerald font-bold">Estado del Servidor</span>
+                        <span id="game-health-text" class="text-brand-emerald font-bold">100%</span>
+                    </div>
+                    <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800">
+                        <div id="game-health-bar" class="bg-brand-emerald h-full transition-all duration-200" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="btn-sound-toggle" onclick="toggleMute()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors text-sm" title="Activar/Silenciar sonido de sintetizador">
+                        <i id="sound-icon" class="fas fa-volume-up"></i>
+                    </button>
+                    <button id="btn-start-game" onclick="startGame()" class="px-5 py-2 bg-brand-crimson hover:bg-rose-600 text-white font-bold rounded-xl transition-colors flex items-center space-x-2 shadow-lg shadow-brand-crimson/20">
+                        <i class="fas fa-play"></i>
+                        <span>Iniciar</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pantalla del Canvas de Juego -->
+            <div class="relative bg-slate-950 rounded-2xl overflow-hidden aspect-video border border-slate-800/80">
+                <canvas id="gameCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+                
+                <!-- Overlay de Instrucciones / GameOver -->
+                <div id="game-overlay" class="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center text-center p-6 transition-all duration-300">
+                    <div class="space-y-4 max-w-md">
+                        <div class="w-20 h-20 bg-brand-crimson/10 text-brand-crimson flex items-center justify-center rounded-2xl text-4xl mx-auto border border-brand-crimson/25 animate-pulse">
+                            <i class="fas fa-shield-halved"></i>
+                        </div>
+                        <h3 id="overlay-title" class="text-2xl font-bold text-white">Consola de Emergencia de Red</h3>
+                        <p id="overlay-desc" class="text-sm text-slate-400">
+                            Los servidores están bajo ataque DDOS simulado de malware mutable. Destruye los paquetes rojos antes de que colapsen el núcleo verde.
+                        </p>
+                        <button onclick="startGame()" class="px-8 py-3 bg-brand-crimson hover:bg-rose-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-brand-crimson/30 hover:scale-105 transform inline-block">
+                            Iniciar Firewall Activo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos técnicos del Proyecto -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 text-slate-300 text-xs sm:text-sm font-mono">
+                <div class="p-4 bg-slate-950/60 border border-slate-800/80 rounded-xl">
+                    <span class="text-brand-cyan font-bold block mb-1">&lt;Tecnologías /&gt;</span>
+                    HTML5 Canvas, Vanilla JS, Web Audio API Synthesizers, optimizado para alto rendimiento.
+                </div>
+                <div class="p-4 bg-slate-950/60 border border-slate-800/80 rounded-xl">
+                    <span class="text-brand-cyan font-bold block mb-1">&lt;Ciberseguridad /&gt;</span>
+                    Modelado de flujo de amenazas concurrentes y manejo reactivo de mitigación de paquetes.
+                </div>
+                <div class="p-4 bg-slate-950/60 border border-slate-800/80 rounded-xl">
+                    <span class="text-brand-cyan font-bold block mb-1">&lt;Log de Aprendizaje /&gt;</span>
+                    Demuestra el control estricto de hilos de refresco (RequestAnimationFrame) y el uso matemático de vectores.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección: Terminal Interactiva -->
+    <section id="terminal" class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="text-center mb-10">
+            <h2 class="text-3xl font-bold">Consola CLI Interactiva de Pedro</h2>
+            <p class="text-slate-600 dark:text-slate-400 mt-2">¿Quieres investigar mis habilidades como reclutador? Usa la terminal.</p>
+        </div>
+        
+        <!-- Contenedor de la Terminal -->
+        <div class="bg-slate-900 text-slate-100 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden font-mono text-sm max-w-3xl mx-auto">
+            <!-- Barra superior -->
+            <div class="bg-slate-950 px-4 py-3 flex items-center justify-between border-b border-slate-800">
+                <div class="flex space-x-2">
+                    <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                    <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                    <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                </div>
+                <div class="text-xs text-slate-400 select-none">pedro@firewall: ~ (zsh)</div>
+                <div class="w-4"></div>
+            </div>
+            <!-- Cuerpo de la consola -->
+            <div id="terminal-body" class="p-5 h-80 overflow-y-auto space-y-3 flex flex-col justify-start">
+                <p class="text-slate-400">Consola de diagnóstico v2.6. Escribe <span class="text-brand-cyan font-bold">help</span> para ver los comandos.</p>
+                <!-- Historial de comandos (se llenará dinámicamente) -->
+                <div id="terminal-history" class="space-y-3"></div>
+                <!-- Línea de entrada actual -->
+                <div class="flex items-center space-x-2">
+                    <span class="text-brand-emerald font-bold">pedro@firewall:~$</span>
+                    <input type="text" id="terminal-input" class="bg-transparent border-none outline-none flex-1 text-slate-100 focus:ring-0 focus:border-none p-0" autofocus autocomplete="off">
+                </div>
+            </div>
+            <!-- Sugerencias de botones rápidos para móviles -->
+            <div class="bg-slate-950 p-3 border-t border-slate-800 flex flex-wrap gap-2 justify-center">
+                <button onclick="runQuickCommand('about')" class="px-3 py-1 bg-slate-900 hover:bg-brand-500 rounded text-xs transition-colors">about</button>
+                <button onclick="runQuickCommand('skills')" class="px-3 py-1 bg-slate-900 hover:bg-brand-500 rounded text-xs transition-colors">skills</button>
+                <button onclick="runQuickCommand('red-defence')" class="px-3 py-1 bg-slate-900 hover:bg-brand-crimson rounded text-xs transition-colors">red-defence</button>
+                <button onclick="runQuickCommand('contact')" class="px-3 py-1 bg-slate-900 hover:bg-brand-500 rounded text-xs transition-colors">contact</button>
+                <button onclick="runQuickCommand('clear')" class="px-3 py-1 bg-slate-900 hover:bg-red-600 rounded text-xs transition-colors">clear</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección: Sobre Mí -->
+    <section id="sobre-mi" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-200/50 dark:border-slate-800/50">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <!-- Columna Texto -->
+            <div class="space-y-6">
+                <h3 class="text-brand-500 font-semibold tracking-wide uppercase text-sm">Sobre Mí</h3>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
+                    Un programador que se toma en serio el rendimiento y la ciberseguridad
+                </h2>
+                <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-lg">
+                    Hola, soy Pedro. Llevo años dedicando mi pasión a entender el ciclo completo de vida del software, desde la conceptualización visual hasta el aseguramiento de sus servidores e integraciones API robustas.
+                </p>
+                <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Me encanta solucionar bugs complejos y diseñar mecanismos de defensa dinámicos (como en "Red Defence"). Trabajo con stacks modernos como React, Tailwind, NextJS y APIs en NodeJS/Python. Me adapto rápidamente a cualquier entorno técnico con un enfoque proactivo y orientado a la excelencia.
+                </p>
+                <div class="grid grid-cols-2 gap-4 pt-4">
+                    <div class="border-l-4 border-brand-500 pl-4">
+                        <span class="block text-2xl font-bold">4+</span>
+                        <span class="text-sm text-slate-500 dark:text-slate-400">Años de Desarrollo</span>
+                    </div>
+                    <div class="border-l-4 border-brand-cyan pl-4">
+                        <span class="block text-2xl font-bold">25+</span>
+                        <span class="text-sm text-slate-500 dark:text-slate-400">Proyectos Implementados</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Columna Imagen / Compromisos -->
+            <div class="relative">
+                <div class="absolute -inset-1 bg-gradient-to-r from-brand-500 to-brand-cyan rounded-2xl blur-lg opacity-30"></div>
+                <div class="relative bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
+                    <h4 class="font-bold text-xl flex items-center space-x-2 text-slate-900 dark:text-white">
+                        <i class="fas fa-certificate text-brand-cyan"></i>
+                        <span>Compromisos de Ingeniería</span>
+                    </h4>
+                    
+                    <ul class="space-y-4 text-slate-600 dark:text-slate-400">
+                        <li class="flex items-start space-x-3">
+                            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-brand-500/10 dark:bg-brand-500/20 text-brand-500 flex items-center justify-center mt-1">
+                                <i class="fas fa-lock text-sm"></i>
+                            </span>
+                            <div>
+                                <strong class="text-slate-900 dark:text-white block">Ciberseguridad por Diseño</strong>
+                                Diseño todas mis plataformas minimizando los vectores de ataque conocidos (OWASP Top 10).
+                            </div>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-brand-cyan/10 dark:bg-brand-cyan/20 text-brand-cyan flex items-center justify-center mt-1">
+                                <i class="fas fa-bolt text-sm"></i>
+                            </span>
+                            <div>
+                                <strong class="text-slate-900 dark:text-white block">Optimización Extrema</strong>
+                                Compresión de assets, ruteos eficientes y queries SQL optimizados para cargar en milisegundos.
+                            </div>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-brand-emerald/10 dark:bg-brand-emerald/20 text-brand-emerald flex items-center justify-center mt-1">
+                                <i class="fas fa-graduation-cap text-sm"></i>
+                            </span>
+                            <div>
+                                <strong class="text-slate-900 dark:text-white block">Autodidacta Continuo</strong>
+                                Perfeccionando constantemente metodologías ágiles e infraestructuras DevOps.
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección: Habilidades (Skills Grid) -->
+    <section id="habilidades" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-200/50 dark:border-slate-800/50">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <h3 class="text-brand-500 font-semibold tracking-wide uppercase text-sm">Stack Técnico</h3>
+            <h2 class="text-3xl sm:text-4xl font-extrabold mt-2 text-slate-900 dark:text-white">Mis Habilidades</h2>
+            <p class="text-slate-600 dark:text-slate-400 mt-4">Las herramientas en las que destaco día a día para crear aplicaciones seguras.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Frontend -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-brand-500/5 transition-all duration-300 hover:-translate-y-1">
+                <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center text-xl mb-4">
+                    <i class="fab fa-react"></i>
+                </div>
+                <h4 class="font-bold text-lg mb-4">Frontend Web</h4>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>React &amp; NextJS</span>
+                            <span class="font-semibold text-brand-500">90%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-indigo-500 h-full rounded-full" style="width: 90%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>TypeScript / JS</span>
+                            <span class="font-semibold text-brand-500">92%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-indigo-500 h-full rounded-full" style="width: 92%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Tailwind CSS</span>
+                            <span class="font-semibold text-brand-500">95%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-indigo-500 h-full rounded-full" style="width: 95%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backend -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-brand-500/5 transition-all duration-300 hover:-translate-y-1">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-xl mb-4">
+                    <i class="fab fa-node-js"></i>
+                </div>
+                <h4 class="font-bold text-lg mb-4">Backend &amp; Lógica</h4>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Node.js &amp; Express</span>
+                            <span class="font-semibold text-brand-emerald">88%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-emerald-500 h-full rounded-full" style="width: 88%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Python / Django</span>
+                            <span class="font-semibold text-brand-emerald">82%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-emerald-500 h-full rounded-full" style="width: 82%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>APIs RESTful</span>
+                            <span class="font-semibold text-brand-emerald">95%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-emerald-500 h-full rounded-full" style="width: 95%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ciberseguridad & DB -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-brand-500/5 transition-all duration-300 hover:-translate-y-1">
+                <div class="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center text-xl mb-4">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <h4 class="font-bold text-lg mb-4">Seguridad &amp; Datos</h4>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Criptografía &amp; JWT</span>
+                            <span class="font-semibold text-brand-cyan">85%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-cyan-500 h-full rounded-full" style="width: 85%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>PostgreSQL &amp; Mongo</span>
+                            <span class="font-semibold text-brand-cyan">88%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-cyan-500 h-full rounded-full" style="width: 88%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Docker &amp; Linux</span>
+                            <span class="font-semibold text-brand-cyan">80%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-cyan-500 h-full rounded-full" style="width: 80%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metodologías -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-brand-500/5 transition-all duration-300 hover:-translate-y-1">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center text-xl mb-4">
+                    <i class="fas fa-users-gear"></i>
+                </div>
+                <h4 class="font-bold text-lg mb-4">Metodologías</h4>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Git &amp; Colaboración</span>
+                            <span class="font-semibold text-purple-500">95%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-purple-500 h-full rounded-full" style="width: 95%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Arquitectura Modular</span>
+                            <span class="font-semibold text-purple-500">90%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-purple-500 h-full rounded-full" style="width: 90%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Testing (Jest/PyTest)</span>
+                            <span class="font-semibold text-purple-500">80%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-purple-500 h-full rounded-full" style="width: 80%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección: Proyectos (Portafolio) -->
+    <section id="proyectos" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-200/50 dark:border-slate-800/50">
+        <div class="text-center max-w-3xl mx-auto mb-12">
+            <h3 class="text-brand-500 font-semibold tracking-wide uppercase text-sm">Portafolio</h3>
+            <h2 class="text-3xl sm:text-4xl font-extrabold mt-2 text-slate-900 dark:text-white">Otros Proyectos Destacados</h2>
+            <p class="text-slate-600 dark:text-slate-400 mt-4">Descubre más sistemas complejos en los que he trabajado.</p>
+        </div>
+
+        <!-- Contenedor Grid de Proyectos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <!-- Proyecto 1 (SaaS Admin) -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-lg group hover:shadow-2xl transition-all duration-300 flex flex-col h-full">
+                <div class="relative overflow-hidden aspect-video">
+                    <img src="https://placehold.co/600x400/1e1b4b/38bdf8?text=Vanguard+Shield+Monitor" alt="Shield Dashboard" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/4f46e5/ffffff?text=Vanguard+Shield'">
+                    <span class="absolute top-4 left-4 bg-brand-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-md">Dashboard</span>
+                </div>
+                <div class="p-6 flex flex-col flex-grow justify-between space-y-4">
+                    <div class="space-y-2">
+                        <h4 class="text-xl font-bold group-hover:text-brand-500 transition-colors text-slate-900 dark:text-white">Vanguard Network Shield</h4>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm">
+                            Dashboard de visualización de métricas de red y detección de anomalías utilizando WebSockets para alertas instantáneas.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="text-xs font-mono bg-slate-100 dark:bg-slate-950 px-2 py-1 rounded border border-slate-200 dark:border-slate-800">React</span>
+                            <span class="text-xs font-mono bg-slate-100 dark:bg-slate-950 px-2 py-1 rounded border border-slate-200 dark:border-slate-800">Express</span>
+                            <span class="text-xs font-mono bg-slate-100 dark:bg-slate-950 px-2 py-1 rounded border border-slate-200 dark:border-slate-800">Chart.js</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-200/50 dark:border-slate-800/50">
+                            <span class="text-xs text-slate-500 font-mono">Privado</span>
+                            <a href="#contacto" class="text-brand-500 font-bold hover:underline text-sm flex items-center space-x-1">
+                                <span>Pedir Demo</span> <i class="fas fa-lock"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proyecto 2 (Secure API Gateway) -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-lg group hover:shadow-2xl transition-all duration-300 flex flex-col h-full">
+                <div class="relative overflow-hidden aspect-video">
+                    <img src="https://placehold.co/600x400/0f172a/10b981?text=Zero+Trust+Gate" alt="Zero Trust Gateway" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/4f46e5/ffffff?text=Zero+Trust+Gate'">
+                    <span class="absolute top-4 left-4 bg-brand-cyan text-slate-950 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-md">Backend</span>
+                </div>
+                <div class="p-6 flex flex-col flex-grow justify-between space-y-4">
+                    <div class="space-y-2">
+                        <h4 class="text-xl font-bold group-hover:text-brand-500 transition-colors text-slate-900 dark:text-white">ZeroTrust Auth Service</h4>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm">
+                            Gateway de autenticación robusto con encriptación simétrica, rate-limiting integrado en Redis y rotación automática de claves JWT.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="text-xs font-mono bg-slate-100 dark:bg-slate-950 px-2 py-1 rounded border border-slate-200 dark:border-slate-800">FastAPI</span>
+                            <span class="text-xs font-mono bg-slate-100 dark:bg-slate-950 px-2 py-1 rounded border border-slate-200 dark:border-slate-800">Redis</span>
+                            <span class="text-xs font-mono bg-slate-100 dark:bg-slate-950 px-2 py-1 rounded border border-slate-200 dark:border-slate-800">Docker</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-200/50 dark:border-slate-800/50">
+                            <span class="text-xs text-slate-500 font-mono">Código Abierto</span>
+                            <a href="#" class="text-slate-800 dark:text-slate-200 hover:text-brand-cyan transition-colors flex items-center space-x-1 text-sm">
+                                <span>Ver Repositorio</span> <i class="fab fa-github"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proyecto 3 (E-Commerce con Cifrado) -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-lg group hover:shadow-2xl transition-all duration-300 flex flex-col h-full">
+                <div class="relative overflow-hidden aspect-video">
+                    <img src="https://placehold.co/600x400/111827/a855f7?text=Encrypted+Shop+Core" alt="Encrypted Shop" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/4f46e5/ffffff?text=Encrypted+Shop'">
+                    <span class="absolute top-4 left-4 bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-md">Full Stack</span>
+                </div>
+                <div class="p-6 flex flex-col flex-grow justify-between space-y-4">
+                    <div class="space-y-2">
+                        <h4 class="text-xl font-bold group-hover:text-brand-500 transition-colors text-slate-900 dark:text-white">Encrypted Checkout Engine</h4>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm">
+                            Motor de comercio electrónico enfocado en proteger los metadatos de transacciones y datos de envío de los compradores utilizando criptografía asimétrica.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="text-xs font-mono bg-slate-100 dark:bg-slate-950 px-2 py-1 rounded border border-slate-200 dark:border-slate-800">NextJS</span>
+                            <span class="text-xs font-mono bg-slate-100 dark:bg-slate-950 px-2 py-1 rounded border border-slate-200 dark:border-slate-800">NodeJS</span>
+                            <span class="text-xs font-mono bg-slate-100 dark:bg-slate-950 px-2 py-1 rounded border border-slate-200 dark:border-slate-800">PostgreSQL</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-200/50 dark:border-slate-800/50">
+                            <span class="text-xs text-slate-500 font-mono">Beta Cerrada</span>
+                            <a href="#" class="text-slate-800 dark:text-slate-200 hover:text-brand-cyan transition-colors flex items-center space-x-1 text-sm">
+                                <span>Demo URL</span> <i class="fas fa-external-link-alt text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Sección: Contacto -->
+    <section id="contacto" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-200/50 dark:border-slate-800/50">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Columna de Información -->
+            <div class="space-y-6">
+                <h3 class="text-brand-500 font-semibold tracking-wide uppercase text-sm">¿Trabajamos Juntos?</h3>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
+                    Impulsa tu plataforma al siguiente nivel de seguridad
+                </h2>
+                <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-lg">
+                    ¿Tienes una vacante técnica, buscas un consultor externo o un programador full-stack para un despliegue crítico? Escríbeme y analicemos cómo puedo aportar valor inmediato a tu equipo.
+                </p>
+                
+                <div class="space-y-4 pt-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-brand-500/10 text-brand-500 flex items-center justify-center text-lg">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <span class="block text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Correo Directo</span>
+                            <a href="mailto:pedro@tusitio.dev" class="text-slate-800 dark:text-slate-200 hover:text-brand-500 font-bold">pedro@tusitio.dev</a>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-brand-cyan/10 text-brand-cyan flex items-center justify-center text-lg">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            <span class="block text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Ubicación</span>
+                            <span class="text-slate-800 dark:text-slate-200 font-bold">Caracas, Venezuela (Soporte global remoto)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Banner Adicional -->
+                <div class="p-6 rounded-2xl bg-gradient-to-tr from-brand-crimson/10 to-transparent border border-brand-crimson/20 max-w-md">
+                    <h4 class="font-bold text-slate-900 dark:text-white mb-2 flex items-center space-x-2">
+                        <i class="fas fa-fire-flame-curved text-brand-crimson"></i>
+                        <span>Compromiso de Respuesta</span>
+                    </h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        Responderé tus solicitudes, correos o propuestas laborales en menos de 12 horas hábiles con total transparencia técnica.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Columna del Formulario de Contacto -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xl">
+                <form id="contactForm" onsubmit="handleContactSubmit(event)" class="space-y-5">
+                    <div>
+                        <label for="nombre" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Nombre Completo</label>
+                        <input type="text" id="nombre" name="nombre" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-slate-900 dark:text-white transition-all duration-300" placeholder="Ej. Carlos Mendoza">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Correo Electrónico</label>
+                        <input type="email" id="email" name="email" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-slate-900 dark:text-white transition-all duration-300" placeholder="carlos@empresa.com">
+                    </div>
+                    <div>
+                        <label for="mensaje" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Detalles de la Vacante / Proyecto</label>
+                        <textarea id="mensaje" name="mensaje" rows="4" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-slate-900 dark:text-white transition-all duration-300" placeholder="Háblame de tu proyecto, presupuesto o rol disponible..."></textarea>
+                    </div>
+                    
+                    <button type="submit" id="btn-submit" class="w-full py-4 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-lg shadow-brand-500/20 hover:shadow-brand-500/40 transition-all duration-300 flex items-center justify-center space-x-2">
+                        <i class="fas fa-paper-plane" id="btn-icon"></i>
+                        <span id="btn-text">Enviar Invitación</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-100 dark:bg-slate-950 py-12 border-t border-slate-200 dark:border-slate-900 relative z-10 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+            <span class="text-2xl font-extrabold bg-gradient-to-r from-brand-500 to-brand-cyan bg-clip-text text-transparent">
+                &lt;Pedro.Dev /&gt;
+            </span>
+            <p class="text-slate-500 dark:text-slate-400 text-sm max-w-md mx-auto font-mono">
+                "Defensa, arquitectura y código impecable."
+            </p>
+            <div class="flex justify-center space-x-6 text-xl text-slate-400 dark:text-slate-500">
+                <a href="#" class="hover:text-brand-500 transition-colors"><i class="fab fa-github"></i></a>
+                <a href="#" class="hover:text-brand-500 transition-colors"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="hover:text-brand-500 transition-colors"><i class="fab fa-twitter"></i></a>
+            </div>
+            <div class="text-xs text-slate-400 dark:text-slate-600">
+                &copy; 2026 Pedro Dev. Todos los derechos reservados. Desarrollado con ❤️ en Venezuela.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts Principales de Carga, Partículas y Juego -->
+    <script>
+        // --- INICIALIZACIÓN DE VARIABLES GLOBALES ---
+        const themeToggle = document.getElementById('themeToggle');
+        const themeToggleMobile = document.getElementById('themeToggleMobile');
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const menuIcon = document.getElementById('menuIcon');
+        
+        // --- CONTROL DEL MENÚ MÓVIL ---
+        mobileMenuButton.addEventListener('click', () => {
+            const isHidden = mobileMenu.classList.contains('hidden');
+            if (isHidden) {
+                mobileMenu.classList.remove('hidden');
+                menuIcon.className = "fas fa-times text-xl";
+            } else {
+                mobileMenu.classList.add('hidden');
+                menuIcon.className = "fas fa-bars text-xl";
+            }
+        });
+
+        // --- SISTEMA DE TEMA CLARO/OSCURO ---
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+
+        themeToggle.addEventListener('click', toggleTheme);
+        themeToggleMobile.addEventListener('click', toggleTheme);
+
+        // --- DESCARGAR CV SIMULADO ---
+        function descargarCV() {
+            showToast("Iniciando descarga de currículum de Pedro... (Simulación)");
+        }
+
+        // --- SISTEMA DE NOTIFICACIÓN TOAST (No usar alert) ---
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toastMessage.textContent = message;
+            if (isError) {
+                toast.classList.remove('bg-brand-emerald');
+                toast.classList.add('bg-red-500');
+            } else {
+                toast.classList.remove('bg-red-500');
+                toast.classList.add('bg-brand-emerald');
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 4000);
+        }
+
+        // --- FORMULARIO DE CONTACTO (Interactividad) ---
+        function handleContactSubmit(event) {
+            event.preventDefault();
+            const btnSubmit = document.getElementById('btn-submit');
+            const btnText = document.getElementById('btn-text');
+            const btnIcon = document.getElementById('btn-icon');
+
+            btnSubmit.disabled = true;
+            btnText.textContent = "Desplegando...";
+            btnIcon.className = "fas fa-spinner animate-spin";
+
+            setTimeout(() => {
+                btnSubmit.disabled = false;
+                btnText.textContent = "Enviar Invitación";
+                btnIcon.className = "fas fa-paper-plane";
+                
+                showToast("¡Mensaje enviado con éxito! Pedro se comunicará contigo pronto.");
+                document.getElementById('contactForm').reset();
+            }, 1500);
+        }
+
+        // --- TERMINAL INTERACTIVA ---
+        const terminalInput = document.getElementById('terminal-input');
+        const terminalHistory = document.getElementById('terminal-history');
+        const terminalBody = document.getElementById('terminal-body');
+
+        // Comandos de Consola personalizados para Pedro
+        const commands = {
+            help: `Comandos del sistema disponibles:<br>
+                   - <span class='text-brand-500'>about</span>: Conoce más sobre Pedro.<br>
+                   - <span class='text-brand-500'>skills</span>: Habilidades y tecnologías dominadas.<br>
+                   - <span class='text-brand-crimson font-bold'>red-defence</span>: Detalles del juego de ciberseguridad.<br>
+                   - <span class='text-brand-500'>contact</span>: Redes y canales de contacto directo.<br>
+                   - <span class='text-brand-500'>clear</span>: Limpiar historial de consola.`,
+            about: "Pedro es un programador apasionado por el rendimiento, el backend resiliente y el frontend interactivo. Ha trabajado en múltiples implementaciones enfocadas en mitigar riesgos y automatizar arquitecturas complejas.",
+            skills: "Javascript/TypeScript (React, NextJS), Python (Django/FastAPI), Docker, Linux, Criptografía, PostgreSQL, MongoDB, APIs seguras.",
+            "red-defence": "Red Defence es un videojuego de firewall activo desarrollado por Pedro en Javascript puro usando Canvas. Demuestra su habilidad para manejar lógicas, flujos paralelos de hilos de ejecución y optimización extrema.",
+            contact: "Email: <span class='text-brand-cyan'>pedro@tusitio.dev</span> | GitHub: github.com/pedrodev | LinkedIn: linkedin.com/in/pedrodev",
+        };
+
+        terminalInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const query = this.value.trim().toLowerCase();
+                this.value = '';
+                
+                if (query === '') return;
+
+                const lineQuery = document.createElement('div');
+                lineQuery.className = "flex items-start space-x-2";
+                lineQuery.innerHTML = `<span class="text-brand-emerald font-bold">pedro@firewall:~$</span> <span class="text-slate-100">${query}</span>`;
+                terminalHistory.appendChild(lineQuery);
+
+                const lineResponse = document.createElement('div');
+                lineResponse.className = "text-slate-300 pl-4 border-l border-slate-800 pb-2";
+
+                if (query === 'clear') {
+                    terminalHistory.innerHTML = '';
+                    return;
+                } else if (commands[query]) {
+                    lineResponse.innerHTML = commands[query];
+                } else if (query.includes('sudo')) {
+                    lineResponse.innerHTML = "<span class='text-red-500'>[FIREWALL_WARNING] Acceso restringido. Intentos de hackeo reportados a Pedro. 😉</span>";
+                } else {
+                    lineResponse.innerHTML = `Comando '${query}' no reconocido. Digite <span class="text-brand-cyan">help</span> para ver el manual.`;
+                }
+
+                terminalHistory.appendChild(lineResponse);
+                terminalBody.scrollTop = terminalBody.scrollHeight;
+            }
+        });
+
+        function runQuickCommand(cmd) {
+            terminalInput.value = cmd;
+            const event = new KeyboardEvent('keydown', { key: 'Enter' });
+            terminalInput.dispatchEvent(event);
+        }
+
+        // --- SINTETIZADOR DE AUDIO (Web Audio API) ---
+        let audioCtx = null;
+        let isMuted = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const icon = document.getElementById('sound-icon');
+            if (isMuted) {
+                icon.className = "fas fa-volume-mute text-red-500";
+                showToast("Efectos de sonido desactivados");
+            } else {
+                icon.className = "fas fa-volume-up text-brand-emerald";
+                showToast("Efectos de sonido activados");
+            }
+        }
+
+        function playSound(type) {
+            if (isMuted) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            // Reanudar contexto si está suspendido
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'pop') {
+                // Sonido agudo al neutralizar malware
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(1000, now + 0.1);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'damage') {
+                // Sonido de alerta grave al dañarse el servidor
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(60, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'gameover') {
+                // Sonido descendente al colapsar el sistema
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.linearRampToValueAtTime(40, now + 0.8);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                osc.start(now);
+                osc.stop(now + 0.8);
+            }
+        }
+
+        // --- MOTOR DEL JUEGO "RED DEFENCE" ---
+        const gameCanvas = document.getElementById('gameCanvas');
+        const gameCtx = gameCanvas.getContext('2d');
+        const scoreEl = document.getElementById('game-score');
+        const highEl = document.getElementById('game-high');
+        const healthBar = document.getElementById('game-health-bar');
+        const healthText = document.getElementById('game-health-text');
+        const gameOverlay = document.getElementById('game-overlay');
+        const overlayTitle = document.getElementById('overlay-title');
+        const overlayDesc = document.getElementById('overlay-desc');
+
+        let score = 0;
+        let highScore = 0;
+        let serverHealth = 100;
+        let isPlaying = false;
+        let threats = [];
+        let particles = [];
+        let threatSpawnTimer = 0;
+        let threatSpawnInterval = 60; // En cuadros de render
+        let animationId = null;
+
+        // Redimensionar Canvas internamente manteniendo el aspect ratio
+        function resizeGameCanvas() {
+            const rect = gameCanvas.parentNode.getBoundingClientRect();
+            gameCanvas.width = rect.width;
+            gameCanvas.height = rect.height;
+        }
+
+        window.addEventListener('resize', resizeGameCanvas);
+        resizeGameCanvas();
+
+        class Threat {
+            constructor() {
+                // Spawn aleatorio en los bordes de la pantalla
+                const side = Math.floor(Math.random() * 4);
+                if (side === 0) { // Top
+                    this.x = Math.random() * gameCanvas.width;
+                    this.y = -20;
+                } else if (side === 1) { // Right
+                    this.x = gameCanvas.width + 20;
+                    this.y = Math.random() * gameCanvas.height;
+                } else if (side === 2) { // Bottom
+                    this.x = Math.random() * gameCanvas.width;
+                    this.y = gameCanvas.height + 20;
+                } else { // Left
+                    this.x = -20;
+                    this.y = Math.random() * gameCanvas.height;
+                }
+
+                this.size = Math.random() * 8 + 10;
+                this.speed = Math.random() * 1.5 + 1.2;
+                
+                // Target: El servidor central en el medio del canvas
+                const targetX = gameCanvas.width / 2;
+                const targetY = gameCanvas.height / 2;
+                const angle = Math.atan2(targetY - this.y, targetX - this.x);
+                
+                this.vx = Math.cos(angle) * this.speed;
+                this.vy = Math.sin(angle) * this.speed;
+                
+                // Variantes visuales para los malwares
+                this.pulse = 0;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.pulse += 0.1;
+            }
+
+            draw() {
+                gameCtx.save();
+                // Sombra de brillo neon
+                gameCtx.shadowBlur = 10;
+                gameCtx.shadowColor = 'rgba(244, 63, 94, 0.8)';
+                
+                // Círculo central mutable
+                gameCtx.fillStyle = '#f43f5e';
+                gameCtx.beginPath();
+                gameCtx.arc(this.x, this.y, this.size + Math.sin(this.pulse) * 2, 0, Math.PI * 2);
+                gameCtx.fill();
+
+                // Detalles tipo satélite de virus
+                gameCtx.strokeStyle = 'rgba(244, 63, 94, 0.4)';
+                gameCtx.lineWidth = 2;
+                gameCtx.beginPath();
+                gameCtx.arc(this.x, this.y, this.size * 1.5, 0, Math.PI * 2);
+                gameCtx.stroke();
+
+                gameCtx.restore();
+            }
+        }
+
+        // Efectos de partículas al explotar amenazas
+        class ExplosionParticle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 3 + 1;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 4 + 1;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.03 + 0.015;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= this.decay;
+            }
+
+            draw() {
+                gameCtx.save();
+                gameCtx.globalAlpha = this.alpha;
+                gameCtx.fillStyle = '#06b6d4';
+                gameCtx.beginPath();
+                gameCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                gameCtx.fill();
+                gameCtx.restore();
+            }
+        }
+
+        function startGame() {
+            initAudio();
+            isPlaying = true;
+            score = 0;
+            serverHealth = 100;
+            threats = [];
+            particles = [];
+            threatSpawnInterval = 60;
+            
+            scoreEl.textContent = score;
+            healthBar.style.width = '100%';
+            healthBar.className = "bg-brand-emerald h-full transition-all duration-200";
+            healthText.textContent = '100%';
+            healthText.className = "text-brand-emerald font-bold";
+
+            gameOverlay.classList.add('opacity-0', 'pointer-events-none');
+            
+            if (animationId) cancelAnimationFrame(animationId);
+            gameLoop();
+        }
+
+        function gameOver() {
+            isPlaying = false;
+            playSound('gameover');
+            if (score > highScore) {
+                highScore = score;
+                highEl.textContent = highScore;
+            }
+
+            overlayTitle.textContent = "¡Servidor Colapsado!";
+            overlayTitle.className = "text-2xl font-bold text-red-500";
+            overlayDesc.innerHTML = `El malware superó las defensas del firewall.<br>Filtros neutralizados: <span class="text-brand-cyan font-bold">${score}</span>.`;
+            gameOverlay.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        // Intercepción de clicks/toques en el Canvas
+        function handleInteraction(clientX, clientY) {
+            if (!isPlaying) return;
+
+            const rect = gameCanvas.getBoundingClientRect();
+            const clickX = clientX - rect.left;
+            const clickY = clientY - rect.top;
+
+            // Revisar colisión con malwares activos
+            for (let i = threats.length - 1; i >= 0; i--) {
+                const threat = threats[i];
+                const dist = Math.hypot(clickX - threat.x, clickY - threat.y);
+                
+                // Si hizo clic en un malware
+                if (dist < threat.size * 2) {
+                    playSound('pop');
+                    // Crear partículas
+                    for (let p = 0; p < 12; p++) {
+                        particles.push(new ExplosionParticle(threat.x, threat.y));
+                    }
+                    
+                    threats.splice(i, 1);
+                    score += 10;
+                    scoreEl.textContent = score;
+
+                    // Incrementar dificultad paulatinamente
+                    if (score % 100 === 0 && threatSpawnInterval > 15) {
+                        threatSpawnInterval -= 5;
+                    }
+                    break;
+                }
+            }
+        }
+
+        gameCanvas.addEventListener('mousedown', (e) => handleInteraction(e.clientX, e.clientY));
+        gameCanvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                handleInteraction(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        });
+
+        // Bucle de renderizado del Canvas
+        function gameLoop() {
+            if (!isPlaying) return;
+
+            // Fondo translúcido para rastro neon
+            gameCtx.fillStyle = 'rgba(2, 6, 23, 0.2)';
+            gameCtx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+            // 1. Dibujar Servidor Core en el Centro
+            const coreX = gameCanvas.width / 2;
+            const coreY = gameCanvas.height / 2;
+            const coreRadius = 24;
+
+            gameCtx.save();
+            gameCtx.shadowBlur = 20;
+            // El color del núcleo cambia con el daño
+            if (serverHealth > 50) {
+                gameCtx.shadowColor = 'rgba(16, 185, 129, 0.8)';
+                gameCtx.fillStyle = '#10b981';
+            } else if (serverHealth > 25) {
+                gameCtx.shadowColor = 'rgba(245, 158, 11, 0.8)';
+                gameCtx.fillStyle = '#f59e0b';
+            } else {
+                gameCtx.shadowColor = 'rgba(239, 68, 68, 0.8)';
+                gameCtx.fillStyle = '#ef4444';
+            }
+
+            gameCtx.beginPath();
+            gameCtx.arc(coreX, coreY, coreRadius, 0, Math.PI * 2);
+            gameCtx.fill();
+            gameCtx.restore();
+
+            // Dibujar un escudo simulado alrededor del core
+            gameCtx.strokeStyle = 'rgba(99, 102, 241, 0.2)';
+            gameCtx.lineWidth = 1;
+            gameCtx.beginPath();
+            gameCtx.arc(coreX, coreY, coreRadius * 2.2, 0, Math.PI * 2);
+            gameCtx.stroke();
+
+            // 2. Spawnear nuevas amenazas de malware
+            threatSpawnTimer++;
+            if (threatSpawnTimer >= threatSpawnInterval) {
+                threats.push(new Threat());
+                threatSpawnTimer = 0;
+            }
+
+            // 3. Actualizar y dibujar amenazas de malware
+            for (let i = threats.length - 1; i >= 0; i--) {
+                const threat = threats[i];
+                threat.update();
+                threat.draw();
+
+                // Comprobar colisión con el Servidor Central (core)
+                const distToCore = Math.hypot(coreX - threat.x, coreY - threat.y);
+                if (distToCore < coreRadius + threat.size) {
+                    // Daño sufrido
+                    playSound('damage');
+                    serverHealth -= 15;
+                    if (serverHealth < 0) serverHealth = 0;
+
+                    // Actualizar barra e indicadores visuales
+                    healthBar.style.width = `${serverHealth}%`;
+                    healthText.textContent = `${serverHealth}%`;
+                    
+                    if (serverHealth <= 50 && serverHealth > 25) {
+                        healthBar.className = "bg-yellow-500 h-full transition-all duration-200";
+                        healthText.className = "text-yellow-500 font-bold";
+                    } else if (serverHealth <= 25) {
+                        healthBar.className = "bg-red-500 h-full transition-all duration-200";
+                        healthText.className = "text-red-500 font-bold animate-pulse";
+                    }
+
+                    // Eliminar amenaza
+                    threats.splice(i, 1);
+
+                    if (serverHealth <= 0) {
+                        gameOver();
+                        return;
+                    }
+                }
+            }
+
+            // 4. Actualizar y dibujar partículas de explosión
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+                p.draw();
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // --- SISTEMA DE PARTÍCULAS DE FONDO (Canvas General) ---
+        const bgCanvas = document.getElementById('particleCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let bgParticlesArray = [];
+
+        function setBgCanvasSize() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = Math.min(document.body.scrollHeight, 4000);
+        }
+
+        setBgCanvasSize();
+        window.addEventListener('resize', setBgCanvasSize);
+
+        class BackgroundParticle {
+            constructor() {
+                this.x = Math.random() * bgCanvas.width;
+                this.y = Math.random() * bgCanvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 0.4 - 0.2;
+                this.speedY = Math.random() * 0.4 - 0.2;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > bgCanvas.width) this.speedX = -this.speedX;
+                if (this.y < 0 || this.y > bgCanvas.height) this.speedY = -this.speedY;
+            }
+            draw() {
+                bgCtx.fillStyle = document.documentElement.classList.contains('dark') ? 'rgba(99, 102, 241, 0.15)' : 'rgba(99, 102, 241, 0.4)';
+                bgCtx.beginPath();
+                bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                bgCtx.fill();
+            }
+        }
+
+        function initBgParticles() {
+            bgParticlesArray = [];
+            for (let i = 0; i < 40; i++) {
+                bgParticlesArray.push(new BackgroundParticle());
+            }
+        }
+
+        function animateBgParticles() {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            for (let i = 0; i < bgParticlesArray.length; i++) {
+                bgParticlesArray[i].update();
+                bgParticlesArray[i].draw();
+            }
+            requestAnimationFrame(animateBgParticles);
+        }
+
+        // Asegurar que el bucle de render se inicie cuando se cargue la página
+        window.onload = function() {
+            resizeGameCanvas();
+            initBgParticles();
+            animateBgParticles();
+        };
+    </script>
+</body>
+</html>
